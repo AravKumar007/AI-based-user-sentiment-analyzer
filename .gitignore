@@ -1,0 +1,16 @@
+# Hide Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Hide system/IDE files
+.DS_Store
+.vscode/
+.env
+
+# Hide logs and local files
+*.log
+sentiment_log.csv
+temp_audio_file.mp3
