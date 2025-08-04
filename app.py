@@ -178,11 +178,11 @@ with tab2:
                 "options": {
                     "scales": {
                         "y": {
-                            "beginAtZero": true,
-                            "title": { "display": true, "text": "Count" }
+                            "beginAtZero": True,
+                            "title": { "display": True, "text": "Count" }
                         },
                         "x": {
-                            "title": { "display": true, "text": "Sentiment" }
+                            "title": { "display": True, "text": "Sentiment" }
                         }
                     }
                 }
