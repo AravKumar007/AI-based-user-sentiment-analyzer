@@ -6,6 +6,7 @@ An AI based Multi-Lingual Sentiment Analyzer
 
 [![GitHub Repo](https://img.shields.io/badge/Source-Code-181717?logo=github)](https://github.com/AravKumar007/AI-based-user-sentiment-analyzer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/AravKumar007/ai-sentiment-analyzer)
 
 A Streamlit-based application for analyzing sentiment in text or audio inputs across multiple languages. It uses a multilingual BERT model for sentiment analysis and Whisper for audio transcription.
 Features
