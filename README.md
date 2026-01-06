@@ -17,8 +17,11 @@ Features
 - 📁 Logs results to a secure CSV
 - 📈 Shows sentiment trend/history graphs
 
+--------------RUN THIS PROJECT HERE--------------
+Live Demo: https://arav9696-sentiment-analysis.hf.space
 
-Setup----
+
+Setup-----------
 
 Clone the repository:  
 `git clone https://github.com/AravKumar007/AI-based-user-sentiment-analyzer.git`
