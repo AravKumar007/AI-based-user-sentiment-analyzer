@@ -1,54 +1,46 @@
 from transformers import pipeline
 from langdetect import detect, LangDetectException
 
+# Load the multilingual sentiment analysis model
 def load_model():
-    classifier = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
-    return classifier
+    model_name = "cardiffnlp/twitter-xlm-roberta-base-sentiment-multilingual"
+    return pipeline("sentiment-analysis", model=model_name)
 
+# Detect language
 def detect_language(text):
     try:
         return detect(text)
     except LangDetectException:
         return "unknown"
 
+# Predict sentiment - returns a dictionary
 def predict_sentiment(text, model):
-    if not text.strip():
-        return {
-            "label": "INVALID",
-            "score": 0.0,
-            "emoji": "❓",
-            "message": "Invalid input: Text is empty",
-            "language": "unknown"
-        }
-    
-    result = model(text)[0]
-    label = result['label']  # e.g., "1 star", "2 stars", ..., "5 stars"
-    score = round(result['score'], 2)
-    
-    # Map labels to sentiment
-    sentiment_map = {
-        "1 star": "Very Negative",
-        "2 stars": "Negative",
-        "3 stars": "Neutral",
-        "4 stars": "Positive",
-        "5 stars": "Very Positive"
-    }
-    emoji_map = {
-        "1 star": "😣",
-        "2 stars": "😔",
-        "3 stars": "😐",
-        "4 stars": "😊",
-        "5 stars": "😄"
-    }
-    
-    sentiment = sentiment_map.get(label, "Unknown")
-    emoji = emoji_map.get(label, "❓")
-    message = "Safe to Post ✅" if label in ["4 stars", "5 stars"] and score > 0.75 else "Think Before Posting ⚠️"
-    
+    result = model(text)[0]  # pipeline returns list with one dict
+
+    label = result['label']
+    score = result['score']
+
+    # Map the model's labels to custom output
+    if label == "positive":
+        custom_label = "Positive"
+        emoji = "😊"
+        message = "Safe to Post Check Mark"
+    elif label == "negative":
+        custom_label = "Negative"
+        emoji = "😠"
+        message = "Not Safe"
+    elif label == "neutral":
+        custom_label = "Neutral"
+        emoji = "😐"
+        message = "Think before posting"
+    else:
+        custom_label = label
+        emoji = "❓"
+        message = "Unknown"
+
     return {
-        "label": sentiment,
+        "label": custom_label,
         "score": score,
         "emoji": emoji,
-        "message": message,
-        "language": detect_language(text)
+        "message": message
     }
