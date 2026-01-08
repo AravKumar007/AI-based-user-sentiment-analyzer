@@ -7,15 +7,19 @@ from filelock import FileLock
 from sentiment_model import load_model, predict_sentiment, detect_language
 from transcribe_audio import transcribe_audio
 
-# FIRST STREAMLIT COMMAND - MUST BE HERE
+# FIRST STREAMLIT COMMAND
 st.set_page_config(page_title="Sentiment Analysis", layout="centered")
 
-# Cache the model
+# Cache model
 @st.cache_resource
 def get_model():
     return load_model()
 
 model = get_model()
+
+# Initialize session history (private per browser tab)
+if 'history' not in st.session_state:
+    st.session_state.history = []
 
 st.title("🧠 AI-Based User Sentiment Analyzer")
 
@@ -56,7 +60,6 @@ with tab1:
                     lang = detect_language(input_text)
                     st.info(f"Detected Language: {lang.upper()}")
 
-                    # Get result as dict
                     result = predict_sentiment(input_text, model)
 
                     label = result["label"]
@@ -64,7 +67,6 @@ with tab1:
                     emoji = result["emoji"]
                     message = result["message"]
 
-                    # Display sentiment
                     if label == "Positive":
                         st.success(f"{emoji} {label} (Confidence: {score:.2f})")
                     elif label == "Negative":
@@ -72,14 +74,13 @@ with tab1:
                     else:
                         st.warning(f"{emoji} {label} (Confidence: {score:.2f})")
 
-                    # Safe to post
                     st.markdown("### Safe to Post?")
                     if message == "Safe to Post Check Mark":
                         st.success("✅ Yes! This content is positive and safe to post.")
                     else:
                         st.warning("⚠️ Think before posting.")
 
-                    # Log to CSV
+                    # Add to PRIVATE session history
                     log_entry = {
                         "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "input_type": "Audio" if audio_file else "Text",
@@ -88,24 +89,15 @@ with tab1:
                         "confidence": round(score, 3),
                         "text": input_text[:500]
                     }
-
-                    csv_file = "sentiment_history.csv"
-                    lock = FileLock(csv_file + ".lock")
-                    with lock:
-                        if os.path.exists(csv_file):
-                            df = pd.read_csv(csv_file)
-                            df = pd.concat([df, pd.DataFrame([log_entry])], ignore_index=True)
-                        else:
-                            df = pd.DataFrame([log_entry])
-                        df.to_csv(csv_file, index=False)
+                    st.session_state.history.append(log_entry)
 
         else:
             st.warning("Please enter text or upload an audio file.")
 
 with tab2:
-    st.header("Sentiment History")
-    if os.path.exists("sentiment_history.csv"):
-        df = pd.read_csv("sentiment_history.csv")
+    st.header("Your Private History (This Session Only)")
+    if st.session_state.history:
+        df = pd.DataFrame(st.session_state.history)
         st.dataframe(df)
 
         if len(df) > 1:
@@ -116,21 +108,17 @@ with tab2:
             df['score'] = df['sentiment'].map(sentiment_map).fillna(0)
 
             st.line_chart(df['score'])
-            st.caption("Sentiment Trend (+1 = Positive, 0 = Neutral, -1 = Negative)")
+            st.caption("Your Personal Sentiment Trend")
+        
+        # Optional: Clear history button
+        if st.button("Clear My History"):
+            st.session_state.history = []
+            st.success("History cleared!")
     else:
-        st.info("No history yet. Analyze something first!")
+        st.info("No entries yet in this session. Start analyzing!")
 
 with tab3:
     st.header("About")
-    st.markdown("""
-    ### Features
-    - Multilingual support
-    - Voice transcription with Whisper
-    - Sentiment analysis
-    - History & graphs
-    - Safe-to-post advice
-
-    Made with ❤️ using Streamlit, Transformers, and Whisper.
-    """)
-    st.markdown("[GitHub Repo](https://github.com/AravKumar007/AI-based-user-sentiment-analyzer)")
+    st.markdown("Multilingual text/voice sentiment analysis with private session history.")
+    st.markdown("[GitHub](https://github.com/AravKumar007/AI-based-user-sentiment-analyzer)")
     st.markdown("[Live Demo](https://arav9696-sentiment-analysis.hf.space)")
